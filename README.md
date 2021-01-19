@@ -16,6 +16,5 @@ Run:
 
 ## Resources & Links
 While working on emulating the Chip8 language, I found the following links helpful:
-http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.4
-
-http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
+1. http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.4
+2. http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
