@@ -1,6 +1,7 @@
+# For Brew installs
 include_directories(/usr/local/include)
-
 link_directories(/usr/local/lib)
+
 cmake_minimum_required(VERSION 3.7)
 project(CHIP_8_Emulator)
 
@@ -11,4 +12,5 @@ add_executable(chip8 ${SOURCE_FILES})
 
 find_package(SDL2 REQUIRED)
 
+# Link Brew Headers
 target_link_libraries(chip8 SDL2)
