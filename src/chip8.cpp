@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <random>
 #include "time.h"
 
-#include "chip8.h"
+#include "chip8.hh"
 
 unsigned char chip8Fontset[80] =
 {
@@ -73,13 +74,20 @@ bool Chip8::loadROM(const char *file_path) {
     }
 
     fseek(rom, 0, SEEK_END);
-    uint8_t romSize = ftell(rom);
+    long romSize = ftell(rom);
     rewind(rom);
 
     char* romBuffer = (char *) malloc(sizeof(char) * romSize);
     if (romBuffer == NULL) {
         printf("Could not allocate memory");
         return false;
+    }
+
+    size_t result = fread(romBuffer, sizeof(char), (size_t)romSize, rom);
+    if (result != romSize) {
+        printf("Failed to read ROM: %s\n",strerror(errno));
+        return false;
+    }
 
     if(romSize < 4096 - 512) {
         for (int i=0; i < romSize; i++) {
@@ -88,7 +96,6 @@ bool Chip8::loadROM(const char *file_path) {
     } else {
         printf("ROM too large to load in memory");
         return false;
-    }
     }
 
     fclose(rom);
@@ -104,7 +111,7 @@ void Chip8::emulateCycle() {
     // Decode opcode and execute
     switch (opcode & 0xF000)
     {
-        case 0x000:
+        case 0x0000:
             switch (opcode & 0x000F){
                 case 0x0000:
                     for (int i=0; i < 2048; i++){
@@ -121,7 +128,7 @@ void Chip8::emulateCycle() {
                     break;
 
                 default:
-                    printf("Unrecognized opcode: %n\n", opcode);
+                    printf("Unrecognized opcode: %" PRIu16 "\n", opcode);
                     exit(3);
             }
             break;
@@ -186,51 +193,56 @@ void Chip8::emulateCycle() {
                     V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
                     pc += 2;
                     break;
+                
+                case 0x0003:
+                    V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+                    pc += 2;
+                    break;
 
                 case 0x0004:
                     V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
                     if (V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4] > 255) {
-                        V[16] = 1;
+                        V[15] = 1;
                     } else{
-                        V[16] = 0;
+                        V[15] = 0;
                     }
                     pc += 2;
                     break;
 
                 case 0x0005:
                     if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
-                        V[16] = 1;
+                        V[15] = 1;
                     } else{
-                        V[16] = 0;
+                        V[15] = 0;
                     }
                     V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
                     pc += 2;
                     break;
 
                 case 0x0006:
-                    V[16] = V[(opcode & 0x0F00) >> 8] & 0x1;
+                    V[15] = V[(opcode & 0x0F00) >> 8] & 0x1;
                     V[(opcode & 0x0F00) >> 8] >>= 1;
                     pc += 2;
                     break;
 
                 case 0x0007:
                     if (V[(opcode & 0x0F00) >> 8] < V[(opcode & 0x00F0) >> 4]) {
-                        V[16] = 1;
+                        V[15] = 1;
                     } else{
-                        V[16] = 0;
+                        V[15] = 0;
                     }
                     V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
                     pc += 2;
                     break;
 
                 case 0x000E:
-                    V[16] = V[(opcode & 0x0F00) >> 8] >> 7;
+                    V[15] = V[(opcode & 0x0F00) >> 8] >> 7;
                     V[(opcode & 0x0F00) >> 8] <<= 1;
                     pc += 2;
                     break;
 
                 default:
-                    printf("Unrecognized opcode: %n\n", opcode);
+                    printf("Unrecognized opcode: %" PRIu16 "\n", opcode);
                     exit(3);
             }
             break;
@@ -381,13 +393,13 @@ void Chip8::emulateCycle() {
                     break;
 
                 default:
-                    printf("Unrecognized opcode: %n\n", opcode);
+                    printf("Unrecognized opcode: %" PRIu16 "\n", opcode);
                     exit(3);
             }
             break;
         
         default:
-            printf("Unrecognized opcode: %n\n", opcode);
+            printf("Unrecognized opcode: %" PRIu16 "\n", opcode);
             exit(3);
     }
 

@@ -6,7 +6,7 @@
 #include <SDL2/SDL.h>
 
 
-#include "chip8.h"
+#include "chip8.hh"
 
 using namespace std;
 
