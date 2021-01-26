@@ -1,4 +1,3 @@
-// Driver code and SDL setup copied from https://github.com/JamesGriffin/CHIP-8-Emulator/blob/master/src/main.cpp
 #include <iostream>
 #include <chrono>
 #include <thread>
